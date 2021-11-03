@@ -130,7 +130,7 @@ jobs:
             paths:
               - project/.circleci/ansible/inventory.txt
         # Here's where you will add some code to rollback on failure 
-              - destroy_environment
+        - destroy_environment
 
   destroy-environment:
     docker:
@@ -149,22 +149,25 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - run: apk add --update gzip
-      - run: apk add --update tar 
-      - run: pipinstall awscli
       # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["ac:04:41:92:6d:63:53:6c:74:b2:a9:08:6f:1d:e7:4a"]
       # attach workspace
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
-            # Your code here
-            exit 1
+            # install the dependencies needed for your playbook
+            apk add --update ansible 
+            apk add --update tar 
+            apk add --update gzip
+            pipinstall awscli
       - run:
           name: Configure server
           command: |
-            # Your code here
-            exit 1
-      # Here's where you will add some code to rollback on failure      
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy_environment
 
   
 
