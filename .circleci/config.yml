@@ -25,7 +25,7 @@ commands:
                 npm install
                 npm run migration:revert
               fi 
-
+# change
 jobs:
   build-frontend:
     docker:
