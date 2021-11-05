@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  aws-cli: circleci/aws-cli@2.0.3
-
 commands: 
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -211,16 +208,21 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - aws-cli/setup
+      - run: yum install -y tar gzip
+      - run: yum install -y curl
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
-            cd frontend
-            npm install
-            npm install webpack-dev-server -g
+            yum update -y
+            yum install -y python3
+            curl -sL https://rpm.nodesource.com/setup_14.x | bash -
+            yum install -y nodejs
+            pip3 install ansible
       - run:
           name: Get backend url
           command: |
@@ -241,6 +243,25 @@ jobs:
 
       - destroy-environment  
       - revert-migrations
+
+# ploy-frontend:
+#     docker:
+#       - image: amazon/aws-cli
+#     steps:
+#       - checkout 
+#       - run: yum install -y tar gzip
+#       - run: yum install -y curl
+#       - attach_workspace:
+#           at: ~/
+#       - run:
+#           name: Install dependencies
+#           command: |
+#             yum update -y
+#             yum install -y python3
+#       - run: pip3 install ansible
+#       - run: |
+#               curl -sL https://rpm.nodesource.com/setup_14.x | bash -
+#               yum install -y nodejs
 
   # deploy-backend:
   #   docker:
@@ -273,6 +294,7 @@ jobs:
   #           cd .circleci/ansible
   #           echo "Contents  of the inventory.txt file is -------"
   #           cat inventory.txt
+  #           ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory.txt deploy-backend.yml
   #           ansible-playbook -i inventory.txt deploy-backend.yml
 
   #     - destroy-environment  
