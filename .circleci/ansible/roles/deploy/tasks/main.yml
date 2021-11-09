@@ -1,16 +1,5 @@
 
 
-# # copy folder
-# - name: "Copy file with owner and permissions"
-#   ansible.builtin.copy:
-#     src: ./artifact.tar.gz
-#     dest: ./artifact.tar.gz
-
-# [8:27 AM] Niki Anderson
-# cd ~/backend
-
-# [8:27 AM] Niki Anderson
-# - name: "unarchive backend files"unarchive:src: artifact.tar.gzdest: /home/ubuntu- name: start appbecome: yesshell: |cd ~/backendnpm installpm2 stop defaultpm2 start npm -- start
 
 
 
@@ -20,16 +9,24 @@
     src: artifact.tar.gz
     dest: /home/ubuntu
 
+- name: start app
+  become: yes
+  shell: |
+    cd ~/backend
+    npm install 
+    pm2 stop default 
+    pm2 start npm -- start
+
 # - name: "make sure we are cd into the directory we just made"
 # - name: "build"
 
-- name: "install npm and start"
-  become: yes
-  shell: |
-    cd ./backend
-    npm install
-    npm run build
-    pm2 stop default
-    pm2 start npm -- start
-    cd dist
-    pm2 start main.js
+# - name: "install npm and start"
+#   become: yes
+#   shell: |
+#     cd ./backend
+#     npm install
+#     npm run build
+#     pm2 stop default
+#     pm2 start npm -- start
+#     cd dist
+#     pm2 start main.js
