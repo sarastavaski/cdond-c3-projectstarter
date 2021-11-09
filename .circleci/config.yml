@@ -330,8 +330,8 @@ jobs:
               else
                 return 1
               fi
-      - destroy-environment 
-      - revert-migrations
+      # - destroy-environment 
+      # - revert-migrations
 
 workflows:
   default:
@@ -365,5 +365,6 @@ workflows:
       #     requires: [smoke-test]
       # - cleanup:
       #     requires: [cloudfront-update]
+      # 
 
 
