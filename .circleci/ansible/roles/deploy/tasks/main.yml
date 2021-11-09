@@ -1,8 +1,4 @@
 
-
-
-
-
 # unzip
 - name: "Extract ./artifact.tar.gz into ./backend"
   unarchive:
