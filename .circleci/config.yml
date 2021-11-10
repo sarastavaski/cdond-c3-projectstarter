@@ -396,12 +396,11 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      # - attach_workspace:
-      #     at: ~/
+      - attach_workspace:
+          at: ~/
       - run:
           name: Remove old stacks and files
           command: |
-            cd ~/project
             cat OldWorkflowID.txt
             OldWorkflowID=$(cat OldWorkflowID.txt)
             echo OldWorkflowID: "${OldWorkflowID}"
