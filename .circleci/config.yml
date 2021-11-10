@@ -34,7 +34,7 @@ jobs:
     docker:
       - image: amazon/aws-cli
     environment:
-      OldWorkflowID: export OldWorkflowID=$(aws cloudformation \
+      OldWorkflowID: $(aws cloudformation \
             list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
             --no-paginate --output text)
     steps:
