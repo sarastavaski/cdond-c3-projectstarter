@@ -43,8 +43,7 @@ jobs:
           command: |
             aws cloudformation \
             list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-            --no-paginate --output text >> .circleci/OldWorkflowID.txt
-            cd .circleci/
+            --no-paginate --output text >> OldWorkflowID.txt
             cat OldWorkflowID.txt
       # - persist_to_workspace:
       #     root: ~/
