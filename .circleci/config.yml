@@ -34,7 +34,10 @@ jobs:
     docker:
       - image: amazon/aws-cli
     steps:
-      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            yum install -y tar gzip
       - run:
           name: input Old Workflow ID to .circleci/OldWorkflowID
           command: |
