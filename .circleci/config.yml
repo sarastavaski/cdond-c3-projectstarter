@@ -45,10 +45,10 @@ jobs:
             list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
             --no-paginate --output text >> OldWorkflowID.txt
             cat OldWorkflowID.txt
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - project/.circleci/OldWorkflowID.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/OldWorkflowID.txt
 
       # - run:
       #     name: Test custom environment variable
@@ -397,14 +397,13 @@ jobs:
     steps:
       - checkout
       # attach workspace
-      - attach_workspace:
-          at: ~/
+      # - attach_workspace:
+      #     at: ~/
       - run:
           name: Remove old stacks and files
           command: |
-            cd .circleci/
-            cat OldWorkflowID.txt
-            OldWorkflowID=$(cat OldWorkflowID.txt)
+            cat ~/OldWorkflowID.txt
+            OldWorkflowID=$(cat ~/OldWorkflowID.txt)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
