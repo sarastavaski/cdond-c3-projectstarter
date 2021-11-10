@@ -41,11 +41,14 @@ jobs:
       - checkout
       - run:
           name: Set custom environment variable
-          command: echo OldWorkflowID="$OldWorkflowID" >> "${BASH_ENV}"
+          command: |
+            echo OldWorkflowID="$OldWorkflowID" >> "${BASH_ENV}"
+            echo OldWorkflowID: "${OldWorkflowID}"
 
       - run:
           name: Test custom environment variable
-          command: echo $OldWorkflowID 
+          command: |
+            echo $OldWorkflowID 
      
       # - run:
       #     name: Get old stack workflow id
