@@ -376,13 +376,20 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            yum install -y tar gzip
+            yum install -y curl
       - attach_workspace:
           at: ~/
       - run:
           name: Remove old stacks and files
           command: |
             cat OldWorkflowID.txt
-            OldWorkflowID=$(cat OldWorkflowID.txt)
+            export OldWorkflowID=$(cat OldWorkflowID.txt)
+            export OldId=${OldWorkflowID: -7}
+            echo OldId: "${OldId}"
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
