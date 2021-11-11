@@ -32,25 +32,25 @@ commands:
             fi
 
 jobs:
-  fetch-OldWorkflowID:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - run:
-          name: Install dependencies
-          command: |
-            yum install -y tar gzip
-      - run:
-          name: input Old Workflow ID to .circleci/OldWorkflowID
-          command: |
-            aws cloudformation \
-            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-            --no-paginate --output text >> OldWorkflowID.txt
-            cat OldWorkflowID.txt
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/OldWorkflowID.txt
+  # fetch-OldWorkflowID:
+  #   docker:
+  #     - image: amazon/aws-cli
+  #   steps:
+  #     - run:
+  #         name: Install dependencies
+  #         command: |
+  #           yum install -y tar gzip
+  #     - run:
+  #         name: input Old Workflow ID to .circleci/OldWorkflowID
+  #         command: |
+  #           aws cloudformation \
+  #           list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+  #           --no-paginate --output text >> OldWorkflowID.txt
+  #           cat OldWorkflowID.txt
+  #     - persist_to_workspace:
+  #         root: ~/
+  #         paths:
+  #           - project/OldWorkflowID.txt
 
   build-frontend:
     docker:
@@ -386,26 +386,49 @@ jobs:
       - run:
           name: Remove old stacks and files
           command: |
-            cat OldWorkflowID.txt
-            export OldWorkflowID=$(cat OldWorkflowID.txt)
-            export OldId=${OldWorkflowID: -7}
-            echo OldId: "${OldId}"
+            # cat OldWorkflowID.txt
+            # export OldWorkflowID=$(cat OldWorkflowID.txt)
+            # export OldId=${OldWorkflowID: -7}
+            # echo OldId: "${OldId}"
+            # echo OldWorkflowID: "${OldWorkflowID}"
+            # echo CIRCLE_WORKFLOW_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
+            # Fetch the Old workflow ID
+            export OldWorkflowID=$(aws cloudformation \
+                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                    --no-paginate --output text)
             echo OldWorkflowID: "${OldWorkflowID}"
-            echo CIRCLE_WORKFLOW_ID: "${CIRCLE_WORKFLOW_ID:0:7}"
-            if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
-            then
-              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
-              echo "Delete Confirmed"
-            else 
-              echo "Cannot Cleanup"
-            fi          
+            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
+            # Fetch the stack names          
+            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+                    --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+            echo Stack names: "${STACKS[@]}"  
+
+            for OldWorkflowID in "${STACKS[@]}"; do
+              if [[ $OldWorkflowID =~ "${CIRCLE_WORKFLOW_ID:0:7}" ]]
+              then
+                echo "Current: $OldWorkflowID"
+              else
+                export TheOldId=${OldWorkflowID: -7}
+                aws s3 rm "s3://udapeople-${TheOldId}" --recursive
+                aws cloudformation delete-stack --stack-name "udapeople-backend-${TheOldId}"
+                aws cloudformation delete-stack --stack-name "udapeople-frontend-${TheOldId}"
+              fi
+            done
+
+            # if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
+            # then
+            #   aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
+            #   aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+            #   aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
+            #   echo "Delete Confirmed"
+            # else 
+            #   echo "Cannot Cleanup"
+            # fi          
 
 workflows:
   default:
     jobs:
-      - fetch-OldWorkflowID
+      # - fetch-OldWorkflowID
       - build-frontend
       - build-backend
       - test-frontend:
