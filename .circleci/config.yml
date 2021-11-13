@@ -253,11 +253,12 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress')
-            # export BACKEND_IP=$(aws ec2 describe-instances \
-            #       --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}"\
-            #         "Name=instance-state-name,Values=running" \
-            #       --query 'Reservations[*].Instances[*].{Instance:PublicIpAddress}' --output text)
+            # Fetch and prepare the BACKEND_IP env var
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}"\
+                "Name=instance-state-name,Values=running" \
+              --query 'Reservations[*].Instances[*].{Instance:PublicIpAddress}' --output text)
+            # export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress')
             export API_URL="http://${BACKEND_IP}:3030"
             echo "API_URL = ${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
@@ -330,19 +331,19 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-              # Fetch and prepare the BACKEND_IP env var
-              export BACKEND_IP=$(aws ec2 describe-instances \
-                --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}"\
-                  "Name=instance-state-name,Values=running" \
-                --query 'Reservations[*].Instances[*].{Instance:PublicIpAddress}' --output text)
-              export API_URL="http://${BACKEND_IP}:3030"
-              echo "${API_URL}"
-              if curl "${API_URL}/api/status" | grep "ok"
-              then
-                  return 0
-              else
-                  return 1
-              fi
+            # Fetch and prepare the BACKEND_IP env var
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}"\
+                "Name=instance-state-name,Values=running" \
+              --query 'Reservations[*].Instances[*].{Instance:PublicIpAddress}' --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+                return 0
+            else
+                return 1
+            fi
       - run:
           name: Frontend smoke test.
           command: |
